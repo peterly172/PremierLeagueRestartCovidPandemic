@@ -3,12 +3,12 @@ WITH match_list AS (
 SELECT
 m.id FROM scores m
 WHERE (hometeam_goal + awayteam_goal) >= 6)
-SELECT s.name AS gameweek, COUNT(match_list.id) AS matches
+SELECT g.name AS gameweek, COUNT(match_list.id) AS matches
 FROM scores
-JOIN gameweek AS s
-ON scores.gameweek_id = s.id
+JOIN gameweek AS g
+ON scores.gameweek_id = g.id
 LEFT JOIN match_list ON scores.id = match_list.id
-GROUP BY s.name
+GROUP BY g.name
 ORDER BY matches DESC
 
 --Matches where 4 or more goals were scored
@@ -35,26 +35,25 @@ GROUP BY v.name
 ORDER BY avg DESC
 
 --Full scoresheet using CTE
-WITH team1 AS (
-SELECT s.id, m.date, t.name AS team1, s.hometeam_goal
+WITH home AS (
+SELECT s.id, m.date, t.name AS home, s.hometeam_goal
 FROM scores s
 LEFT JOIN teams t
 ON t.id = s.hometeam_id
 LEFT JOIN match m
 ON s.id = m.id),
-team2 AS (
-SELECT s.id, m.date, t.name AS team2, s.awayteam_goal
+away AS (
+SELECT s.id, m.date, t.name AS away, s.awayteam_goal
 FROM scores s
 LEFT JOIN teams t
 ON t.id = s.awayteam_id
 LEFT JOIN match m
 On s.id = m.id)
-SELECT team1.date, team1.team1, team2.team2, team1.hometeam_goal, team2.awayteam_goal
-FROM team1
-JOIN team2
-On team1.id = team2.id
+SELECT home.date, home.home, away.away, home.hometeam_goal, away.awayteam_goal
+FROM home
+JOIN away
+On home.id = away.id
 ORDER BY date
-
 
 --Full Scoresheet for Chelsea for PL Restart
 WITH home AS(
@@ -73,7 +72,7 @@ ELSE 'Draw' END AS ChelseaPL
 FROM scores s
 LEFT JOIN teams t
 ON s.awayteam_id = t.id)
-SELECT DISTINCT m.date, home.name AS team1, away.name AS team2, hometeam_goal, awayteam_goal,
+SELECT DISTINCT m.date, home.name AS home, away.name AS away, hometeam_goal, awayteam_goal
 FROM scores s
 JOIN match m ON s.id = m.id
 JOIN home ON s.id = home.id
