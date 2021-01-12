@@ -17,19 +17,19 @@ WHERE awayteam_id = 2
 
 --Identify when Arsenal won a match since the PL Restart
 SELECT m.date, s.name, v.name, 
-CASE WHEN scores.hometeam_id = 1 AND hometeam_goal > awayteam_goal THEN 'Arsenal win'
-WHEN scores.awayteam_id = 1 AND awayteam_goal > hometeam_goal THEN 'Arsenal win'
+CASE WHEN scores.hometeam_id = 1 AND hometeam_goal > awayteam_goal THEN 'Arsenal Win'
+WHEN scores.awayteam_id = 1 AND awayteam_goal > hometeam_goal THEN 'Arsenal Win'
 END AS outcome
 FROM scores
 JOIN match m
 ON scores.id = m.id
-JOIN gameweek s
-ON scores.gameweek_id = s.id
+JOIN gameweek g
+ON scores.gameweek_id = g.id
 JOIN venues v
-ON scores.venue_id = v.id
+ON scores.venue_id = g.id
 
---Sum the total records in each gameweek where home teams won
-SELECT s.name AS Gameweek,
+--Sum the total records in each gameweek where home team won
+SELECT g.name AS Gameweek,
 SUM(CASE WHEN gameweek_id = 1 AND hometeam_goal > awayteam_goal THEN 1 ELSE 0 END) AS Matchday_1,
 SUM(CASE WHEN gameweek_id = 2 AND hometeam_goal > awayteam_goal THEN 1 ELSE 0 END) AS Matchday_2,
 SUM(CASE WHEN gameweek_id = 3 AND hometeam_goal > awayteam_goal THEN 1 ELSE 0 END) AS Matchday_3,
@@ -38,11 +38,11 @@ SUM(CASE WHEN gameweek_id = 5 AND hometeam_goal > awayteam_goal THEN 1 ELSE 0 EN
 SUM(CASE WHEN gameweek_id = 6 AND hometeam_goal > awayteam_goal THEN 1 ELSE 0 END) AS Matchday_6,
 SUM(CASE WHEN gameweek_id = 7 AND hometeam_goal > awayteam_goal THEN 1 ELSE 0 END) AS Matchday_7
 FROM scores 
-JOIN gameweek s
-ON scores.gameweek_id = s.id
-GROUP BY s.name
+JOIN gameweek g
+ON scores.gameweek_id = g.id
+GROUP BY g.name
 
---Count the home wins, away wins and Draws in each Stadium
+--Count the hometeam, awayteam and Draws in each Stadium
 SELECT v.name AS venue,
 COUNT(CASE WHEN hometeam_goal > awayteam_goal THEN s.id END) AS home_wins,
 COUNT(CASE WHEN hometeam_goal < awayteam_goal THEN s.id END) AS away_wins,
@@ -52,4 +52,3 @@ JOIN venues v
 ON s.venue_id = v.id
 GROUP BY venue
 ORDER BY home_wins DESC
-
