@@ -1,9 +1,9 @@
---Teams who scored 3 or more goals as Team 1
+--Teams who scored 3 or more goals as Home
 SELECT t.name
 FROM teams t
 WHERE t.id IN (SELECT hometeam_id FROM scores WHERE hometeam_goal >= 3)
 
---Teams who scored 2 or more goals as Team 2
+--Teams who scored 3 or more goals as Away
 SELECT t.name
 FROM teams t
 WHERE t.id IN (SELECT awayteam_id FROM scores WHERE away_goal >= 3)
@@ -107,14 +107,14 @@ WHERE(hometeam_goal + awayteam_goal) =
 FROM scores AS sub)
 
 --Comparing Max goals
-SELECT st.name, MAX(hometeam_goal + awayteam_goal) AS max_goals,
+SELECT g.name, MAX(hometeam_goal + awayteam_goal) AS max_goals,
 (SELECT MAX(hometeam_goal + awayteam_goal) FROM scores) AS overall_max,
 (SELECT MAX (hometeam_goal + awayteam_goal) 
 FROM scores
-WHERE id IN (SELECT id FROM match WHERE EXTRACT(MONTH FROM date) = 07)) AS july_max_goals
-FROM scores sc
-JOIN gameweek AS st
-ON sc.gameweek_id = st.id
+WHERE match_id IN (SELECT id FROM match WHERE EXTRACT(MONTH FROM date) = 07)) AS july_max_goals
+FROM scores s
+JOIN gameweek AS g
+ON s.gameweek_id = g.id
 GROUP BY st.name
 
 --Matches where home or away score 4 or more goals
@@ -124,16 +124,16 @@ WHERE hometeam_goal >= 4 OR awayteam_goal >= 4
 
 --Which gameweek and venue did those matches take place with > 4 goals?
 SELECT
-s.name AS gameweek, v.name AS venue, COUNT(subquery.id) AS matches
+g.name AS gameweek, v.name AS venue, COUNT(subquery.id) AS matches
 FROM (
 SELECT gameweek_id, venue_id, id
 FROM scores
 WHERE hometeam_goal >= 2 OR awayteam_goal >= 2) AS subquery
-JOIN gameweek s
-ON s.id = subquery.gameweek_id
+JOIN gameweek g
+ON g.id = subquery.gameweek_id
 JOIN venues v
 ON v.id = subquery.venue_id
-GROUP BY s.name, v.name	  
+GROUP BY g.name, v.name	  
 
 --Venues where 4 or more goals were scored in one match
 SELECT
